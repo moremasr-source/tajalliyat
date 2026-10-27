@@ -4,7 +4,7 @@ import json, re, pathlib, sys
 ROOT = pathlib.Path(__file__).parent
 Q = json.load(open(ROOT / 'vendor/node_modules/quran-json/dist/quran.json', encoding='utf-8'))
 MARKS = re.compile('[ً-ٰٟۖ-ۭـ]')
-ORDER = ['rahman', 'latif', 'wadud', 'shakur', 'tawwab', 'halim', 'wali', 'wakil', 'hakim', 'wahid', 'azizrahim', 'samibasir', 'azizhakim', 'hayyqayyum', 'ghanihamid', 'ghafurrahim']
+ORDER = ['rahman', 'latif', 'wadud', 'shakur', 'tawwab', 'halim', 'wali', 'wakil', 'hakim', 'wahid', 'azizrahim', 'samibasir', 'azizhakim', 'hayyqayyum', 'ghanihamid', 'ghafurrahim', 'qawi', 'rauf', 'barr']
 GROUPS = ['boy', 'girl', 'youngman', 'youngwoman', 'father', 'mother']
 KOLB = ['tajriba', 'taammul', 'fahm', 'tatbiq']
 

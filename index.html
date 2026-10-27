@@ -181,6 +181,7 @@ const $=s=>document.querySelector(s);
 function h(tag,attrs={},...kids){const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs)){if(v==null)continue;
   if(k==='class')e.className=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(k==='html')e.innerHTML=v;else e.setAttribute(k,v);}
   for(const k of kids.flat()){if(k==null||k===false)continue;e.append(k.nodeType?k:document.createTextNode(k));}return e;}
+function arN(n){return n.toLocaleString('ar-EG')}
 function fill(el,...kids){el.replaceChildren(...kids.flat().filter(k=>k!=null&&k!==false));}
 const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
@@ -219,7 +220,7 @@ function namesGrid(title){return h('div',{style:'display:grid;gap:14px'},h('h2',
 function names(){fill($('#v-names'),
   h('div',{class:'prose'},h('h1',{},'الأسماء'),
     h('p',{class:'muted'},'لكل اسم معناه المبسّط والعميق، وآيته، وحديث يتصل به، ثم عشرة أسئلة للتأمل، وعشرون تجلياً من الحياة اليومية، وعشرون مهمة عملية على دورة كولب: تجربة، فتأمل، ففهم، فتطبيق. اختر لمن تقرأ من الأعلى، فيتغير المحتوى ليناسبه.')),
-  namesGrid('عشرة أسماء'));}
+  namesGrid(arN(A.length)+' اسماً'));}
 
 let tab='tajalliyat';
 function nameView(id){
@@ -281,8 +282,8 @@ function journey(){
   const note=h('textarea',{id:'jnote',placeholder:'اكتب ما لاحظته اليوم… (اختياري، ولا يراه غيرك)'});note.value=J.notes[k]||'';
   note.addEventListener('input',()=>{J.notes[k]=note.value;saveJ();});
   fill($('#v-journey'),
-    h('div',{class:'prose'},h('h1',{},'رحلة ٧٠ يوماً'),
-      h('p',{class:'muted'},'عشرة أسماء، لكل اسم أسبوع. كل يوم خطوة صغيرة تأخذ خمس دقائق: تقرأ، ثم تلاحظ، ثم تجرّب، ثم تطبّق.')),
+    h('div',{class:'prose'},h('h1',{},'رحلة '+arN(A.length*7)+' يوماً'),
+      h('p',{class:'muted'},arN(A.length)+' اسماً، لكل اسم أسبوع.'+' كل يوم خطوة صغيرة تأخذ خمس دقائق: تقرأ، ثم تلاحظ، ثم تجرّب، ثم تطبّق.')),
     h('div',{style:'display:grid;gap:8px'},h('div',{class:'bar'},h('i',{style:`width:${done/total*100}%`})),
       h('p',{class:'small muted'},`أتممت ${ar(done)} من ${ar(total)} يوماً`)),
     h('div',{class:'daycard'},

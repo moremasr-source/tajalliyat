@@ -43,8 +43,9 @@ def resolve(ref, excerpt=None):
     text = text.translate({0x065E: 0x08F1, 0x0656: 0x08F2, 0x0657: 0x08F0})
     return {'ref': ref, 'surah': surah, 'num': f'{a}', 'text': text.lstrip('۞'), 'partial': bool(excerpt)}
 
-problems, names = [], []
-for nid in ORDER:
+problems, names, pending = [], [], []
+ALL = ORDER + sorted(p.stem for p in (ROOT/'data').glob('*.json') if p.stem not in ORDER + ['feelings'])
+for nid in ALL:
     d = json.load(open(ROOT / f'data/{nid}.json', encoding='utf-8'))
     d['ayah'] = resolve(d['ayah']['ref'], d['ayah'].get('excerpt'))
     d['ayat'] = [resolve(x['ref'], x.get('excerpt')) for x in d['ayat']]
@@ -56,7 +57,7 @@ for nid in ORDER:
             problems.append(f'{nid}/{g}: questions={nq} tajalliyat={nt} tasks={nk}')
         for k in ['simple', 'deep', 'lesson']:
             if not grp.get(k): problems.append(f'{nid}/{g}: missing {k}')
-    names.append(d)
+    (pending if d.get('status') in ('draft', 'in_review') else names).append(d)
 
 if problems:
     print('\n'.join(problems)); sys.exit(1)
@@ -71,6 +72,7 @@ out = ROOT / 'dist'; out.mkdir(exist_ok=True)
 (out / 'data.js').write_text('window.ASMA=' + json.dumps(names, ensure_ascii=False) + ';\nwindow.FEEL=' + json.dumps(feel, ensure_ascii=False) + ';', encoding='utf-8')
 for f in feel: print('feel', f['label'], '|', f['ayah']['surah'], f['ayah']['num'], '|', f['ayah']['text'])
 total = sum(len(g['questions']) + len(g['tajalliyat']) + sum(len(g['tasks'][k]) for k in KOLB) for d in names for g in d['groups'].values())
+print(f'in review (validated, not published): {[d["plain"] for d in pending]}')
 print(f'ok: {len(names)} names, {total} items, data.js {(out / "data.js").stat().st_size // 1024} KB')
 for d in names:
     print(d['plain'], '|', d['ayah']['surah'], d['ayah']['num'], '|', d['ayah']['text'])

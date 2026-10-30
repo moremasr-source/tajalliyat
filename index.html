@@ -158,14 +158,34 @@ textarea{width:100%;min-height:96px;border:1px solid var(--rule);border-radius:1
 .steps li span{width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:var(--f-ui);font-size:var(--fs-cap)}
 .care{font-size:var(--fs-ui);color:var(--ink-soft);border-top:1px solid var(--rule);padding-top:14px}
 footer{font-family:var(--f-ui);font-size:var(--fs-cap);color:var(--ink-soft);padding-block:24px;border-top:1px solid var(--rule)}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* theme toggle, share, motion */
+.theme{font-family:var(--f-ui);font-size:var(--fs-ui);border:1px solid var(--rule);background:var(--leaf);color:var(--ink);padding:6px 12px;border-radius:999px;cursor:pointer;transition:background .25s,border-color .25s}
+.theme:hover{border-color:var(--gold)}
+.share{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-family:var(--f-ui)}
+.share button,.share a{font-family:var(--f-ui);font-size:var(--fs-cap);border:1px solid var(--rule);background:var(--leaf);color:var(--ink);padding:5px 12px;border-radius:999px;cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s,transform .2s}
+.share button:hover,.share a:hover{border-color:var(--gold);transform:translateY(-1px)}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(5,8,18,.82);display:grid;place-items:center;padding:16px;animation:fadeIn .3s ease}
+.modal .box{background:var(--leaf);border-radius:18px;padding:14px;max-width:420px;width:100%;display:grid;gap:12px;max-height:94vh;overflow:auto}
+.modal img{width:100%;height:auto;border-radius:12px;display:block}
+.modal .row{display:flex;gap:8px;flex-wrap:wrap;font-family:var(--f-ui)}
+.cardhow{font-family:var(--f-ui);font-size:var(--fs-cap);color:var(--ink-soft);line-height:1.7}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+body{transition:background .35s,color .35s}
+.view:not([hidden]){animation:riseIn .5s cubic-bezier(.2,.7,.2,1)}
+.card{transition:border-color .25s,transform .25s,box-shadow .25s}
+.card:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 8px 24px -14px rgba(0,0,0,.35)}
+.fcard{animation:riseIn .6s cubic-bezier(.2,.7,.2,1)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.card:hover{transform:none}}
 </style>
 
 <div class="wrap top"><div class="col">
   <a class="brand" href="#today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 2l2.4 4.2L19 5l-1.2 4.6L22 12l-4.2 2.4L19 19l-4.6-1.2L12 22l-2.4-4.2L5 19l1.2-4.6L2 12l4.2-2.4L5 5l4.6 1.2z"/><circle cx="12" cy="12" r="3.2"/></svg>تجليات الأسماء</a>
   <nav aria-label="الأقسام">
-    <a href="#today" data-v="today">اليوم</a><a href="#names" data-v="names">الأسماء</a><a href="#feel" data-v="feel">قلبي الآن</a><a href="#journey" data-v="journey">رحلتي</a><a href="#videos" data-v="videos">فيديوهات</a><a href="#sources" data-v="sources">المصادر</a>
+    <a href="#today" data-v="today">اليوم</a><a href="#names" data-v="names">الأسماء</a><a href="#feel" data-v="feel">قلبي الآن</a><a href="#journey" data-v="journey">رحلتي</a><a href="#videos" data-v="videos">فيديوهات</a>
   </nav>
+  <button class="theme" id="themeBtn" type="button" aria-label="تبديل الوضع الليلي والنهاري"></button>
 </div></div>
 
 <main class="wrap"><div class="col">
@@ -177,9 +197,8 @@ footer{font-family:var(--f-ui);font-size:var(--fs-cap);color:var(--ink-soft);pad
   <section class="view" id="v-journey" hidden></section>
   <section class="view" id="v-feel" hidden></section>
   <section class="view" id="v-videos" hidden></section>
-  <section class="view" id="v-sources" hidden></section>
 
-  <footer>محتوى تربوي مأخوذ من بطاقات «تجليات الأسماء»، ونصوص الآيات منقولة حرفياً من المصحف. هذه نسخة أولية تنتظر مراجعة شرعية قبل النشر العام.</footer>
+  <footer>محتوى تربوي مأخوذ من بطاقات «تجليات الأسماء»، ونصوص الآيات منقولة حرفياً من المصحف.</footer>
 </div></main>
 
 <script src="data.js"></script>
@@ -201,8 +220,47 @@ const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.
 let aud=store.get('aud','youngman');
 const G=n=>n.groups[aud];
 
+
+/* ── share ─────────────────────────────── */
+function fullText(text,ref){const u=/^https?:/.test(location.protocol)?'\n'+location.href.split('#')[0]:'';return text+(ref?'\n'+ref:'')+'\n\nتجليات الأسماء'+u;}
+async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch(e){try{const a=h('textarea',{style:'position:fixed;opacity:0'});a.value=t;document.body.append(a);a.select();const ok=document.execCommand('copy');a.remove();return ok}catch(e2){return false}}}
+function wrapLines(c,text,maxW){const out=[];for(const para of text.split('\n')){let line='';for(const w of para.split(' ')){const t=line?line+' '+w:w;if(c.measureText(t).width>maxW&&line){out.push(line);line=w}else line=t}out.push(line)}return out;}
+async function makeCard(text,ref,kind){
+  try{await document.fonts.load('48px "Amiri Quran Local"');await document.fonts.load('600 40px "Noto Naskh Arabic"');await document.fonts.load('500 30px "IBM Plex Sans Arabic"');}catch(e){}
+  const W=1080,H=1350,cv=document.createElement('canvas');cv.width=W;cv.height=H;const c=cv.getContext('2d');c.direction='rtl';c.textAlign='center';c.textBaseline='middle';
+  const g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0E1324');g.addColorStop(1,'#1F2A4F');c.fillStyle=g;c.fillRect(0,0,W,H);
+  const rg=c.createRadialGradient(W/2,H*.42,0,W/2,H*.42,720);rg.addColorStop(0,'rgba(227,180,92,.22)');rg.addColorStop(1,'rgba(227,180,92,0)');c.fillStyle=rg;c.fillRect(0,0,W,H);
+  c.strokeStyle='rgba(227,180,92,.55)';c.lineWidth=3;c.strokeRect(48,48,W-96,H-96);c.strokeStyle='rgba(227,180,92,.25)';c.lineWidth=1.5;c.strokeRect(66,66,W-132,H-132);
+  c.fillStyle='#E3B45C';c.font='500 40px "IBM Plex Sans Arabic",system-ui,sans-serif';c.fillText('تجليات الأسماء',W/2,132);
+  const q=kind==='ayah',fam=q?'"Amiri Quran Local","Amiri Quran","Amiri",serif':'"Noto Naskh Arabic","Amiri",serif';
+  let size=q?88:68,lines;const body=q?'﴿ '+text+' ﴾':text;
+  for(;size>34;size-=2){c.font=`${q?400:600} ${size}px ${fam}`;lines=wrapLines(c,body,W-240);if(lines.length*size*1.9<H-520)break;}
+  const lh=size*1.9,y0=H/2-(lines.length-1)*lh/2-20;c.fillStyle='#F4EFE2';c.shadowColor='rgba(227,180,92,.35)';c.shadowBlur=18;
+  lines.forEach((l,i)=>c.fillText(l,W/2,y0+i*lh));c.shadowBlur=0;
+  if(ref){c.fillStyle='#A9B3D0';c.font='500 30px "IBM Plex Sans Arabic",system-ui,sans-serif';c.fillText(ref,W/2,H-190);}
+  c.fillStyle='rgba(227,180,92,.8)';c.font='500 26px "IBM Plex Sans Arabic",system-ui,sans-serif';c.fillText('✦  اقرأ · تأمّل · جرّب  ✦',W/2,H-120);
+  return new Promise(r=>cv.toBlob(b=>r({blob:b,url:cv.toDataURL('image/png')}),'image/png'));}
+async function shareCard(text,ref,kind){
+  const {blob,url}=await makeCard(text,ref,kind);
+  const file=new File([blob],'tajalliyat.png',{type:'image/png'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],text:fullText(text,ref)});return;}catch(e){if(e&&e.name==='AbortError')return;}}
+  const m=h('div',{class:'modal',role:'dialog','aria-label':'بطاقة للمشاركة',onclick:e=>{if(e.target===m)m.remove()}},
+    h('div',{class:'box'},h('img',{src:url,alt:'بطاقة'}),h('p',{class:'cardhow'},'اضغط مطولاً على الصورة لحفظها أو مشاركتها، أو استعمل زر التنزيل.'),
+      h('div',{class:'row'},h('a',{class:'btn',href:url,download:'tajalliyat.png'},'تنزيل الصورة'),h('button',{class:'btn ghost',onclick:()=>m.remove()},'إغلاق'))));
+  document.body.append(m);}
+function shareRow(text,ref,kind){
+  const cp=h('button',{type:'button',onclick:async()=>{const ok=await copyText(fullText(text,ref));cp.textContent=ok?'تم النسخ ✓':'تعذّر النسخ';setTimeout(()=>cp.textContent='نسخ',1800);}},'نسخ');
+  return h('div',{class:'share'},cp,
+    h('a',{href:'https://wa.me/?text='+encodeURIComponent(fullText(text,ref)),target:'_blank',rel:'noopener'},'واتساب'),
+    h('button',{type:'button',onclick:()=>shareCard(text,ref,kind)},'بطاقة للمشاركة'));}
+
+/* ── theme ─────────────────────────────── */
+function curTheme(){const t=document.documentElement.dataset.theme;if(t)return t;return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
+function setTheme(t,save=true){document.documentElement.dataset.theme=t;const b=$('#themeBtn');if(b)b.textContent=t==='dark'?'☀ نهاري':'☾ ليلي';if(save)store.set('theme',t);}
+(function(){const saved=store.get('theme',null);setTheme(saved||curTheme(),false);$('#themeBtn').addEventListener('click',()=>setTheme(curTheme()==='dark'?'light':'dark'));})();
+
 function ayahEl(a){return h('div',{class:'ayah'},h('span',{class:'orn'},'﴿'),a.text,h('span',{class:'orn'},'﴾'),
-  h('span',{class:'ref'},`${a.partial?'من ':''}سورة ${a.surah}، الآية ${ar(a.num)}`));}
+  h('span',{class:'ref'},`${a.partial?'من ':''}سورة ${a.surah}، الآية ${ar(a.num)}`),shareRow(a.text,`[ ${a.surah}: ${ar(a.num)} ]`,'ayah'));}
 
 /* ── today ─────────────────────────────── */
 function dayIndex(){const d=new Date();return Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()))/864e5);}
@@ -216,7 +274,7 @@ function today(){
       h('div',{class:'meta'},h('span',{},hijri),h('span',{},FOR[aud])),
       h('p',{class:'eyebrow'},'تجلٍّ اليوم من اسم'),
       h('h1',{class:'name'},n.name),
-      h('p',{class:'tajalli'},taj+'.'),
+      h('p',{class:'tajalli'},taj+'.'),shareRow(taj+'.','من اسم الله '+n.plain,'taj'),
       h('p',{class:'muted'},'لا تبحث عن هذا الاسم في الكتب اليوم؛ ابحث عنه في يومك. حين ترى هذا المعنى أمامك، قل في سرّك: «يا '+n.plain.split(' ')[0].replace(/^ال/,'')+'، وصلني أثرك».'),
       ayahEl(n.ayah),
       h('div',{class:'trio'},
@@ -366,17 +424,12 @@ async function signup(chv,c,t,msg){
   catch(e){msg.textContent='لا تملك صلاحية التسجيل في هذه النسخة. استخدم تذكير التقويم.';}
 }
 
-/* ── videos & sources ─────────────────── */
+/* ── videos ─────────────────── */
 function videos(){fill($('#v-videos'),
   h('div',{class:'prose'},h('h1',{},'فيديوهات قصيرة'),h('p',{class:'muted'},'كل مقطع ٤٤ ثانية، عمودي بمقاس ريلز وشورتس، يبدأ بسؤال يوقف المشاهد، ويصل إلى آية، ثم ينتهي بفعل واحد صغير.')),
   h('div',{class:'vids'},Object.entries(VIDEOS).map(([id,t])=>h('figure',{},h('video',{controls:'',preload:'none',playsinline:'',poster:`videos/${id}.jpg`,src:`videos/${id}.mp4`}),
     h('figcaption',{},h('b',{},byId[id].plain),' · ',t)))),
   h('p',{class:'muted small'},'فيديوهات بقية الأسماء تُصنع بالقالب نفسه.'));}
-function sources(){fill($('#v-sources'),
-  h('div',{class:'prose'},h('h1',{},'المصادر والتدقيق'),
-    h('p',{},'نصوص الآيات منقولة حرفياً من المصحف بالرسم العثماني، ومطابَقة برقم السورة والآية آلياً عند بناء الموقع. الأحاديث من الصحيحين والسنن مع رقمها.'),
-    h('p',{class:'muted'},'هذه نسخة أولية: نوصي بمراجعة عالم شرعي لكل المحتوى قبل النشر العام. وفيما يلي ما عدّلناه على البطاقات الأصلية وسببه.')),
-  ...A.map(n=>h('div',{class:'fix'},h('h3',{},n.plain),h('ul',{},...n.review.map(r=>h('li',{},r)),...n.hadith.map(x=>h('li',{class:'muted'},x.src))))));}
 
 /* ── feelings ──────────────────────────── */
 const F=window.FEEL||[];
@@ -396,7 +449,7 @@ function feel(id){
     h('div',{style:'display:grid;gap:12px'},h('h2',{},'الآن، في دقائق'),
       h('ol',{class:'steps'},f.now.map((t,i)=>h('li',{},h('span',{},ar(i+1)),h('p',{},t))))),
     h('div',{style:'display:grid;gap:10px'},h('h3',{},'أسماء ترافقك في هذا الشعور'),
-      h('div',{class:'grid'},f.names.map(id=>{const n=byId[id];return h('a',{class:'card',href:'#name-'+id},h('span',{class:'n'},n.name),h('span',{class:'t'},n.tagline));}))),
+      h('div',{class:'grid'},f.names.map(id=>{const n=byId[id];return h('a',{class:'card',href:'#name-'+id},h('span',{class:'n'},n.name),h('span',{class:'t'},n.tagline),h('span',{class:'cardhow'},(f.how&&f.how[id])||''));}))),
     careNote());
 }
 function careNote(){return h('p',{class:'care'},'إن كان الحزن أو القلق ثقيلاً ويطول أسابيع، أو راودتك أفكار بإيذاء نفسك، فالحديث مع طبيب أو مختص نفسي أو شخص تثق به جزء من الأخذ بالأسباب، ولا يتعارض مع التوكل على الله.');}
@@ -406,12 +459,12 @@ function renderAud(){fill($('#aud'),h('span',{class:'lbl'},'لمن تقرأ؟'),
 function route(){
   const hs=(location.hash||'#today').slice(1);let v=hs.startsWith('name-')?'name':hs;
   if(hs.startsWith('feel-'))v='feel';
-  if(!['today','names','name','feel','journey','videos','sources'].includes(v))v='today';
+  if(!['today','names','name','feel','journey','videos'].includes(v))v='today';
   for(const s of document.querySelectorAll('.view'))s.hidden=s.id!=='v-'+v;
   const navV=v==='name'?'names':v;
   for(const a of document.querySelectorAll('nav a')){if(a.dataset.v===navV)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');}
   renderAud();
-  if(v==='name')nameView(hs.slice(5));else if(v==='feel')feel(hs.slice(5));else({today,names,journey,videos,sources})[v]();
+  if(v==='name')nameView(hs.slice(5));else if(v==='feel')feel(hs.slice(5));else({today,names,journey,videos})[v]();
 }
 window.addEventListener('hashchange',()=>{viewDay=null;tab='tajalliyat';route();window.scrollTo(0,0);});
 J=Object.assign({done:{},notes:{}},store.get('journey',{}));

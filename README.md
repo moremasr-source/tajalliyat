@@ -21,3 +21,6 @@
 
 ## النشر على GitHub
 بعد `python3 build.py` شغّل: `python3 source/standalone.py ../site/dist/index.html index.html`؛ يضيف ترويسة الصفحة (الترميز ومقياس الشاشة) التي يضيفها Claude تلقائياً، ودونها تظهر الصفحة على الهاتف بخطوط مختلطة الأحجام.
+
+## الصور المعتمدة
+مجلد `images/` يضم لكل اسم خمس شرائح (1080×1350) وخلفية جوال (1080×1920): `images/<id>/slide-1..5.jpg` و`wallpaper.jpg`. القالب وأداة التصوير في `source/card.html` و`source/shoot.js`.

@@ -91,6 +91,11 @@ main{padding-block:28px 64px}
 .namehead{display:grid;gap:10px;text-align:center;justify-items:center}
 .namehead .n{font-family:var(--f-display);font-size:var(--fs-display);line-height:1.1}
 .namehead .tag{font-size:var(--fs-lead);color:var(--ink-soft);max-width:34ch}
+.prodimgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.prodimgs a{display:block;border-radius:10px;overflow:hidden;border:1px solid var(--line,rgba(255,255,255,.12))}
+.prodimgs img{display:block;width:100%;height:auto}
+.prodimgs .wp{aspect-ratio:auto}
+details.sch summary{cursor:pointer;font-size:var(--fs-ui)}
 .prose{display:grid;gap:12px;max-width:65ch}
 .prose h2{font-size:var(--fs-h2)}
 .split{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
@@ -178,11 +183,12 @@ footer{font-family:var(--f-ui);font-size:var(--fs-cap);color:var(--ink-soft);pad
 </div></main>
 
 <script src="data.js"></script>
+<script src="prod.js"></script>
 <script>
 const A=window.ASMA||[], byId=Object.fromEntries(A.map(n=>[n.id,n]));
 const GROUPS=[['boy','طفل'],['girl','طفلة'],['youngman','شاب'],['youngwoman','شابة'],['father','أب'],['mother','أم']];
 const GLABEL=Object.fromEntries(GROUPS),FOR={boy:'للطفل',girl:'للطفلة',youngman:'للشاب',youngwoman:'للشابة',father:'للأب',mother:'للأم'}, KOLB=[['tajriba','تجربة'],['taammul','تأمّل'],['fahm','فهم'],['tatbiq','تطبيق']];
-const VIDEOS={rahman:'تنفّسك وأنت نائم',tawwab:'الباب الذي لا يُغلق',shakur:'غصن الشوك'};
+const VIDEOS={rahman:'تنفّسك وأنت نائم',tawwab:'الباب الذي لا يُغلق',shakur:'غصن الشوك',latif:'قطرة تشق الصخر',hakim:'الخيط والسجادة',wali:'أثر واحد على الرمل',wadud:'خطوة تقابلها هرولة',wakil:'طائر خرج جائعاً'};
 const ar=n=>Number(n).toLocaleString('ar-EG');
 const $=s=>document.querySelector(s);
 function h(tag,attrs={},...kids){const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs)){if(v==null)continue;
@@ -230,6 +236,14 @@ function names(){fill($('#v-names'),
   namesGrid(arN(A.length)+' اسماً'));}
 
 let tab='tajalliyat';
+function prodEl(id){const q=window.PROD&&PROD[id];if(!q)return null;
+  const imgs=[1,2,3,4,5].map(i=>`images/${id}/slide-${i}.jpg`).concat([`images/${id}/wallpaper.jpg`]);
+  return h('div',{style:'display:grid;gap:22px'},
+    h('div',{class:'prose'},h('p',{class:'eyebrow'},'مقال التأمل'),h('h2',{},q.article.title),...q.article.paras.map(t=>h('p',{},t))),
+    h('div',{class:'note'},h('b',{},'رسالة الأسبوع: '+q.message.title),h('p',{},q.message.open),h('p',{},q.message.tajalli),h('p',{},h('b',{},'سؤال: '),q.message.question),h('p',{},h('b',{},'مهمة: '),q.message.task)),
+    h('div',{style:'display:grid;gap:10px'},h('h3',{},'صور للمشاركة'),h('p',{class:'muted small'},'خمس شرائح وخلفية للجوال. اضغط على الصورة لفتحها وحفظها.'),
+      h('div',{class:'prodimgs'},imgs.map(u=>h('a',{href:u,target:'_blank',rel:'noopener',download:''},h('img',{src:u,loading:'lazy',alt:q.cover}))))),
+    h('details',{class:'sch'},h('summary',{},'جدول النشر · الأسبوع '+ar(q.week)),h('ul',{},q.schedule.map(r=>h('li',{},r[1]+' '+r[0]+' — '+r[2])))));}
 function nameView(id){
   const n=byId[id];if(!n){location.hash='names';return;}
   const g=G(n),v=$('#v-name');
@@ -251,6 +265,7 @@ function nameView(id){
     h('div',{style:'display:grid;gap:14px'},
       h('div',{class:'tabs',role:'tablist'},tabBtn('tajalliyat','التجليات'),tabBtn('questions','أسئلة التأمل'),tabBtn('tasks','المهام العملية')),
       panels[tab]()),
+    prodEl(id),
     g.note?h('div',{class:'note'},h('b',{},'ملاحظة للمربي'),h('p',{},g.note)):null,
     h('div',{class:'note'},h('b',{},'الخلاصة'),h('p',{},g.lesson)),
     h('div',{style:'display:grid;gap:14px'},h('h3',{},'من السنة'),...n.hadith.map(x=>h('div',{class:'hadith'},h('q',{},x.text),h('small',{},x.src)))),

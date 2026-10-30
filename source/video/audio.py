@@ -40,7 +40,12 @@ def bell(at, base):
         b[m] += a * np.sin(2 * np.pi * f * tt) * np.exp(-tt / d) * np.clip(tt / .01, 0, 1)
     return b
 
-sea = waves({'rahman': 1, 'tawwab': 2, 'shakur': 3}[vid])
+CH = {'latif': ([98,146.83,196,246.94],[130.81,196,261.63,329.63],523.25),
+      'hakim': ([110,164.81,220,277.18],[146.83,220,293.66,369.99],587.33),
+      'wali': ([98,130.81,196,233.08],[130.81,196,261.63,311.13],440),
+      'wadud': ([110,138.59,220,277.18],[146.83,185,293.66,369.99],554.37),
+      'wakil': ([98,146.83,196,293.66],[130.81,196,261.63,392],659.25)}
+sea = waves({'rahman': 1, 'tawwab': 2, 'shakur': 3, 'latif': 4, 'hakim': 5, 'wali': 6, 'wadud': 7, 'wakil': 8}[vid])
 if vid == 'rahman':
     music = .22 * pad([110, 164.81, 220, 261.63]) * env(2, 34.5, 6, 2) + .25 * pad([130.81, 196, 261.63, 329.63]) * env(33.5, 44, 3, 3)
     hb = np.zeros(n)
@@ -53,6 +58,10 @@ if vid == 'rahman':
 elif vid == 'tawwab':
     music = .22 * pad([98, 146.83, 196, 233.08]) * env(2, 31, 6, 2) + .25 * pad([130.81, 196, 261.63, 329.63]) * env(30, 44, 3, 3)
     extra = .05 * bell(31.6, 440); quiet = np.zeros(n)
+elif vid in CH:
+    a, b, bf = CH[vid]
+    music = .22 * pad(a) * env(2, 34, 6, 2) + .25 * pad(b) * env(32, 44, 3, 3)
+    extra = .05 * bell(33.8, bf); quiet = np.zeros(n)
 else:
     music = .22 * pad([110, 146.83, 220, 277.18]) * env(2, 34, 6, 2) + .25 * pad([146.83, 220, 293.66, 369.99]) * env(32, 44, 3, 3)
     steps = np.zeros(n)

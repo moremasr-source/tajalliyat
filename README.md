@@ -18,3 +18,6 @@
 - `build.py`: يتحقق من عدد العناصر (١٠ أسئلة، ٢٠ تجلياً، ٢٠ مهمة لكل فئة)، ويجلب نص كل آية حرفياً من المصحف، ثم يكتب `data.js`.
   يحتاج نص المصحف: `npm install quran-json@3.1.2` داخل مجلد `vendor/`.
 - `video/engine.html` و`render.js` و`audio.py`: قالب الفيديوهات (Playwright + ffmpeg)؛ `node render.js rahman` ثم `python3 audio.py rahman out.wav`.
+
+## النشر على GitHub
+بعد `python3 build.py` شغّل: `python3 source/standalone.py ../site/dist/index.html index.html`؛ يضيف ترويسة الصفحة (الترميز ومقياس الشاشة) التي يضيفها Claude تلقائياً، ودونها تظهر الصفحة على الهاتف بخطوط مختلطة الأحجام.
